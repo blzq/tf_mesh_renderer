@@ -16,8 +16,8 @@
 
 import tensorflow as tf
 
-import camera_utils
-import rasterize_triangles
+from . import camera_utils
+from . import rasterize_triangles
 
 
 def phong_shader(normals,
@@ -74,7 +74,8 @@ def phong_shader(normals,
   Raises:
     ValueError: An invalid argument to the method is detected.
   """
-  batch_size, image_height, image_width = [s.value for s in normals.shape[:-1]]
+  _, image_height, image_width = [s.value for s in normals.shape[:-1]]
+  batch_size = tf.shape(normals)[0]
   light_count = light_positions.shape[1].value
   pixel_count = image_height * image_width
   # Reshape all values to easily do pixelwise computations:
@@ -292,6 +293,7 @@ def mesh_renderer(vertices,
     camera_position = tf.tile(
         tf.expand_dims(camera_position, axis=0), [batch_size, 1])
   elif camera_position.get_shape().as_list() != [batch_size, 3]:
+    print(camera_position.get_shape().as_list())
     raise ValueError('Camera_position must have shape [batch_size, 3]')
   if camera_lookat.get_shape().as_list() == [3]:
     camera_lookat = tf.tile(
@@ -303,21 +305,21 @@ def mesh_renderer(vertices,
   elif camera_up.get_shape().as_list() != [batch_size, 3]:
     raise ValueError('Camera_up must have shape [batch_size, 3]')
   if isinstance(fov_y, float):
-    fov_y = tf.constant(batch_size * [fov_y], dtype=tf.float32)
+    fov_y = tf.tile([fov_y], [tf.shape(vertices)[0]])
   elif not fov_y.get_shape().as_list():
     fov_y = tf.tile(tf.expand_dims(fov_y, 0), [batch_size])
   elif fov_y.get_shape().as_list() != [batch_size]:
     raise ValueError('Fov_y must be a float, a 0D tensor, or a 1D tensor with'
                      'shape [batch_size]')
   if isinstance(near_clip, float):
-    near_clip = tf.constant(batch_size * [near_clip], dtype=tf.float32)
+    near_clip = tf.tile([near_clip], [tf.shape(vertices)[0]])
   elif not near_clip.get_shape().as_list():
     near_clip = tf.tile(tf.expand_dims(near_clip, 0), [batch_size])
   elif near_clip.get_shape().as_list() != [batch_size]:
     raise ValueError('Near_clip must be a float, a 0D tensor, or a 1D tensor'
                      'with shape [batch_size]')
   if isinstance(far_clip, float):
-    far_clip = tf.constant(batch_size * [far_clip], dtype=tf.float32)
+    far_clip = tf.tile([far_clip], [tf.shape(vertices)[0]])
   elif not far_clip.get_shape().as_list():
     far_clip = tf.tile(tf.expand_dims(far_clip, 0), [batch_size])
   elif far_clip.get_shape().as_list() != [batch_size]:

@@ -75,7 +75,7 @@ def look_at(eye, center, world_up):
     A [batch_size, 4, 4] float tensor containing a right-handed camera
     extrinsics matrix that maps points from world space to points in eye space.
   """
-  batch_size = center.shape[0].value
+  batch_size = tf.shape(center)[0]
   vector_degeneracy_cutoff = 1e-6
   forward = center - eye
   forward_norm = tf.norm(forward, ord='euclidean', axis=1, keepdims=True)
@@ -95,8 +95,7 @@ def look_at(eye, center, world_up):
   to_side = tf.divide(to_side, to_side_norm)
   cam_up = tf.cross(to_side, forward)
 
-  w_column = tf.constant(
-      batch_size * [[0., 0., 0., 1.]], dtype=tf.float32)  # [batch_size, 4]
+  w_column = tf.tile([[0., 0., 0., 1.]], [batch_size, 1])  # [batch_size, 4]
   w_column = tf.reshape(w_column, [batch_size, 4, 1])
   view_rotation = tf.stack(
       [to_side, cam_up, -forward,
