@@ -96,6 +96,7 @@ def phong_shader(normals,
   per_light_pixel_positions = tf.reshape(
       tf.tile(pixel_positions, [1, light_count, 1]),
       [batch_size, light_count, pixel_count, 3])
+      # [batch_size, light_count, pixel_count, 3]
   directions_to_lights = tf.nn.l2_normalize(
       tf.expand_dims(light_positions, axis=2) - per_light_pixel_positions,
       axis=3)  # [batch_size, light_count, pixel_count, 3]
