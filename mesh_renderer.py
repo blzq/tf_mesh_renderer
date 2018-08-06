@@ -76,7 +76,7 @@ def phong_shader(normals,
   """
   _, image_height, image_width = [s.value for s in normals.shape[:-1]]
   batch_size = tf.shape(normals)[0]
-  light_count = light_positions.shape[1].value
+  light_count = tf.shape(light_positions)[1]
   pixel_count = image_height * image_width
   # Reshape all values to easily do pixelwise computations:
   normals = tf.reshape(normals, [batch_size, -1, 3])
@@ -93,9 +93,9 @@ def phong_shader(normals,
 
   # Diffuse component
   pixel_positions = tf.reshape(pixel_positions, [batch_size, -1, 3])
-  per_light_pixel_positions = tf.stack(
-      [pixel_positions] * light_count,
-      axis=1)  # [batch_size, light_count, pixel_count, 3]
+  per_light_pixel_positions = tf.reshape(
+      tf.tile(pixel_positions, [1, light_count, 1]),
+      [batch_size, light_count, pixel_count, 3])
   directions_to_lights = tf.nn.l2_normalize(
       tf.expand_dims(light_positions, axis=2) - per_light_pixel_positions,
       axis=3)  # [batch_size, light_count, pixel_count, 3]

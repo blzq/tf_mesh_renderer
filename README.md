@@ -36,6 +36,12 @@ cd kernels
 ./build.sh
 ```
 
+Run tests with (run these commands from outside of the directory):
+```
+python3 -m tf_mesh_renderer.rasterize_triangles_test
+python3 -m tf_mesh_renderer.mesh_renderer_test
+```
+
 Citation
 --------
 
