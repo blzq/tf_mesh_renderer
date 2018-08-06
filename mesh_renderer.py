@@ -275,6 +275,7 @@ def mesh_renderer(vertices,
   if len(vertices.shape) != 3:
     raise ValueError('Vertices must have shape [batch_size, vertex_count, 3].')
   batch_size = vertices.shape[0].value
+  batch_size_dyn = tf.shape(vertices)[0]
   if len(normals.shape) != 3:
     raise ValueError('Normals must have shape [batch_size, vertex_count, 3].')
   if len(light_positions.shape) != 3:
@@ -291,37 +292,36 @@ def mesh_renderer(vertices,
     raise ValueError('Ambient_color must have shape [batch_size, 3].')
   if camera_position.get_shape().as_list() == [3]:
     camera_position = tf.tile(
-        tf.expand_dims(camera_position, axis=0), [batch_size, 1])
+        tf.expand_dims(camera_position, axis=0), [batch_size_dyn, 1])
   elif camera_position.get_shape().as_list() != [batch_size, 3]:
-    print(camera_position.get_shape().as_list())
     raise ValueError('Camera_position must have shape [batch_size, 3]')
   if camera_lookat.get_shape().as_list() == [3]:
     camera_lookat = tf.tile(
-        tf.expand_dims(camera_lookat, axis=0), [batch_size, 1])
+        tf.expand_dims(camera_lookat, axis=0), [batch_size_dyn, 1])
   elif camera_lookat.get_shape().as_list() != [batch_size, 3]:
     raise ValueError('Camera_lookat must have shape [batch_size, 3]')
   if camera_up.get_shape().as_list() == [3]:
-    camera_up = tf.tile(tf.expand_dims(camera_up, axis=0), [batch_size, 1])
+    camera_up = tf.tile(tf.expand_dims(camera_up, axis=0), [batch_size_dyn, 1])
   elif camera_up.get_shape().as_list() != [batch_size, 3]:
     raise ValueError('Camera_up must have shape [batch_size, 3]')
   if isinstance(fov_y, float):
-    fov_y = tf.tile([fov_y], [tf.shape(vertices)[0]])
+    fov_y = tf.tile([fov_y], [batch_size_dyn])
   elif not fov_y.get_shape().as_list():
-    fov_y = tf.tile(tf.expand_dims(fov_y, 0), [batch_size])
+    fov_y = tf.tile(tf.expand_dims(fov_y, 0), [batch_size_dyn])
   elif fov_y.get_shape().as_list() != [batch_size]:
     raise ValueError('Fov_y must be a float, a 0D tensor, or a 1D tensor with'
                      'shape [batch_size]')
   if isinstance(near_clip, float):
-    near_clip = tf.tile([near_clip], [tf.shape(vertices)[0]])
+    near_clip = tf.tile([near_clip], [batch_size_dyn])
   elif not near_clip.get_shape().as_list():
-    near_clip = tf.tile(tf.expand_dims(near_clip, 0), [batch_size])
+    near_clip = tf.tile(tf.expand_dims(near_clip, 0), [batch_size_dyn])
   elif near_clip.get_shape().as_list() != [batch_size]:
     raise ValueError('Near_clip must be a float, a 0D tensor, or a 1D tensor'
                      'with shape [batch_size]')
   if isinstance(far_clip, float):
-    far_clip = tf.tile([far_clip], [tf.shape(vertices)[0]])
+    far_clip = tf.tile([far_clip], [batch_size_dyn])
   elif not far_clip.get_shape().as_list():
-    far_clip = tf.tile(tf.expand_dims(far_clip, 0), [batch_size])
+    far_clip = tf.tile(tf.expand_dims(far_clip, 0), [batch_size_dyn])
   elif far_clip.get_shape().as_list() != [batch_size]:
     raise ValueError('Far_clip must be a float, a 0D tensor, or a 1D tensor'
                      'with shape [batch_size]')
